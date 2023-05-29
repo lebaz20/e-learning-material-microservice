@@ -1,0 +1,73 @@
+<div class="container-fluid">
+    <div class="row">
+        <div style="padding-bottom: 10px; padding-top: 10px;" class="col bg-light text-white" id="menu">
+            <a class="navbar-brand text-dark"><b>CIT-611 Assignment#1</b></a>
+
+        </div>
+        <div style="margin-bottom: 0px; margin-left: 0px;" class="col-12 float-left">
+            <button type="button" style="margin-left: 0px;" class="col-3 btn btn-dark btn-sm float-left" 
+                (click)="openProductDialog()">
+                Add New Product
+            </button>
+
+            <!-- <button type="button" style="margin-left: 100px;" class="btn btn-outline-dark btn-sm float-left" 
+                    (click)="openPriceDialog()">
+                Update Price
+            </button> -->
+
+            <button type="button" style="margin-left: 30px;" class="col-3 btn btn-dark btn-sm float-left" 
+                    (click)="openInventoryDialog()">
+                Update Inventory
+            </button>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px;" class="row-fluid justify-content-center">
+        
+
+        <div *ngFor="let product of products">
+            <div class="col-4 float-left">
+                <h3> {{product.productTitle}} #{{product.id}}</h3>
+                <!-- <h6> {{product.productCode}} </h6> -->
+
+                <div *ngIf="product.price > 0; else addPrice">
+                    <h4 class="badge badge-dark float-left">
+                        Price : ${{ product.price }} 
+                    </h4>
+                </div>
+
+                <div *ngIf="product.quantity > 0; else outOfStock">
+                    <h4 style="margin-left: 20px;" class="badge badge-primary float-left">
+                        Stock : {{ product.quantity }}
+                    </h4>
+                </div>
+                <ng-template #outOfStock>
+                    <h4 style="margin-left: 20px;" class="badge badge-secondary float-left">
+                        Out of stock
+                    </h4>
+                </ng-template>
+
+                <ng-template #addPrice>
+                    <h4 class="badge badge-warning float-left">Price Not Added</h4>
+                </ng-template>
+
+                <br />
+                <div style="clear:both">
+                    <button type="button" class="col-3 btn btn-outline-dark btn-sm float-left" 
+                            (click)="openProductEditDialog(product)">
+                        Update
+                    </button>
+                    <button type="button" style="margin-left: 30px;" class="col-3 btn btn-outline-dark btn-sm float-left" 
+                            (click)="openProductDeleteDialog(product)">
+                        Delete
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="col-5 float-left">
+                <img [attr.src]="product.imageUrl" height="150px" />
+            </div>
+        </div>
+    </div>
+</div>

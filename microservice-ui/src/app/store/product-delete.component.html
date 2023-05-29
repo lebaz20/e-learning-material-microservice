@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>Delete Product #{{data.product.id}}</h1>
+
+<form novalidate #form="ngForm" (ngSubmit)="deleteProduct(form)">
+    <div mat-dialog-content>Are you sure?</div>
+
+    <div mat-dialog-actions align="end">
+        <button mat-button type="submit" cdkFocusInitial>Confirm</button>
+        <button mat-button type="button" (click)="onNoClick()">Cancel</button>
+    </div>
+</form>
