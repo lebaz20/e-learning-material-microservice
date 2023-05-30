@@ -13,4 +13,5 @@ public class MaterialRequest {
     private String resourceType;
     private String resourceId;
     private String url;
+    private Integer commentsCount;
 }

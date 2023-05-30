@@ -11,4 +11,5 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class ELearningEvent {
     private String eventType;
+    private HashMap<String, Object> eventPayload;
 }

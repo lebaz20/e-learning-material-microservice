@@ -22,11 +22,9 @@ class EventHandler {
 
     @RabbitListener(queues = "${eLearning.queue}")
     void handleELearningEvent(final ELearningEvent eLearningEvent) {
-        log.info("ELearning eLearningEvent received for the material of: {} with quantity: {}", eLearningEvent.getMaterialId(), eLearningEvent.getQuantity());
+        log.info("ELearning event received");
         try {
-            // if (eLearningEvent.getQuantity() >= 0)
-            //     log.info("Updating eLearning");
-            //     materialService.updateELearning(eLearningEvent.getMaterialId(), eLearningEvent.getQuantity());
+            materialService.handleELearningEvent(eLearningEvent.getEventType(), eLearningEvent.getEventPayload());
         } catch (final Exception e) {
             log.error("Error when trying to apply eLearning event", e);
             // Avoids the eLearningEvent to be re-queued and reprocessed.

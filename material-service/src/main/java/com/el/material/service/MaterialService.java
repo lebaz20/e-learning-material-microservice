@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MaterialService {
-    Material addMaterial(MaterialRequest materialRequest);
+    void addMaterial(MaterialRequest materialRequest);
     List<Material> getAllMaterials();
     Optional<Material> getMaterialById(Integer materialId);
-    void updateELearning(Integer materialId, Integer quantity);
-    Material editMaterial(Integer id, MaterialRequest materialRequest);
+    void handleELearningEvent(String eventType, HashMap<String, Object> eventPayload);
+    void editMaterial(Integer id, MaterialRequest materialRequest);
     void deleteMaterial(Integer id);
 }

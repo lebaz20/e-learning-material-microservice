@@ -40,7 +40,7 @@ service discovery and **api-gateway** for dynamic service routing as well as loa
 ### 1. Clone this project
 Open terminal and run
 ````
-git clone https://github.com/hnjaman/complete-microservice-application.git
+git clone https://github.com/elaman/complete-microservice-application.git
 ````
 In your current directory ``complete-microservice-application`` directory will be created with five different project inside.
 
@@ -322,4 +322,4 @@ In this case Hystrix will respond with a default message instead of responding I
 
 # Copyright & License
 
-MIT License, see the link: [LICENSE](https://github.com/hnjaman/complete-microservice-application/blob/master/LICENSE) file for details.
+MIT License, see the link: [LICENSE](https://github.com/elaman/complete-microservice-application/blob/master/LICENSE) file for details.
