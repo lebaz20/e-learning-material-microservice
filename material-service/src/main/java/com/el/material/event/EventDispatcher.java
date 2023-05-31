@@ -14,24 +14,24 @@ public class EventDispatcher {
     private RabbitTemplate rabbitTemplate;
 
     // The exchange to use to send anything related to material
-    private String materialExchange;
+    private String eLearningExchange;
 
     // The routing key to use to send this particular event
-    private String materialSolvedRoutingKey;
+    private String eLearningSolvedRoutingKey;
 
     @Autowired
     EventDispatcher(final RabbitTemplate rabbitTemplate,
-                    @Value("${material.exchange}") final String materialExchange,
-                    @Value("${material.pushed.key}") final String materialSolvedRoutingKey) {
+                    @Value("${eLearning.exchange}") final String eLearningExchange,
+                    @Value("${eLearning.pushed.key}") final String eLearningSolvedRoutingKey) {
         this.rabbitTemplate = rabbitTemplate;
-        this.materialExchange = materialExchange;
-        this.materialSolvedRoutingKey = materialSolvedRoutingKey;
+        this.eLearningExchange = eLearningExchange;
+        this.eLearningSolvedRoutingKey = eLearningSolvedRoutingKey;
     }
 
     public void send(final ELearningEvent eLearningEvent) {
         rabbitTemplate.convertAndSend(
-                materialExchange,
-                materialSolvedRoutingKey,
+                eLearningExchange,
+                eLearningSolvedRoutingKey,
                 eLearningEvent);
     }
 }

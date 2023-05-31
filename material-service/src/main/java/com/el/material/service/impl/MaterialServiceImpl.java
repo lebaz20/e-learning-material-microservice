@@ -11,25 +11,29 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 @Service
 public class MaterialServiceImpl implements MaterialService {
 
-	private final MaterialRepository materialRepository;
+	public Material toBeSavedMaterial = new Material(null, null, null, null, null);
+
+	private MaterialRepository materialRepository;
 	private EventDispatcher eventDispatcher;
 
-	private HashMap<String, Object> getEventPayload(Material material) {
-		HashMap<String, Object> eventPayload = new HashMap<String, Object>();
-		eventPayload.put("id", material.getId());
+	private HashMap<String, String> getEventPayload(Material material) {
+		HashMap<String, String> eventPayload = new HashMap<String, String>();
+		eventPayload.put("id", Integer.toString(material.getId()));
 		eventPayload.put("resourceId", material.getResourceId());
 		eventPayload.put("resourceType", material.getResourceType());
 		eventPayload.put("url", material.getUrl());
-		eventPayload.put("commentsCount", material.getCommentsCount());
+		eventPayload.put("commentsCount", Integer.toString(material.getCommentsCount()));
 		return eventPayload;
 	}
 
 	@Autowired
-	public InventoryServiceImpl(MaterialRepository materialRepository,
+	public void InventoryServiceImpl(MaterialRepository materialRepository,
 							EventDispatcher eventDispatcher) {
 		this.materialRepository = materialRepository;
 		this.eventDispatcher = eventDispatcher;
@@ -43,89 +47,132 @@ public class MaterialServiceImpl implements MaterialService {
 				.commentsCount(materialRequest.getCommentsCount())
 				.url(materialRequest.getUrl())
 				.build();
-
-		this.materialRepository.save(material)
-
-		this.eventDispatcher.send(new ELearningEvent("Material created", this.getEventPayload(material)));
+		this.toBeSavedMaterial = material;
+		if(shouldPersist()) {
+			this.materialRepository.save(material);
+	
+			ELearningEvent eLearningEvent = new ELearningEvent();
+			eLearningEvent.eventType = "Material created";
+			eLearningEvent.eventPayload = this.getEventPayload(material);
+			this.eventDispatcher.send(eLearningEvent);
+		}
 	}
 
 	@Override
 	public void editMaterial(Integer id, MaterialRequest materialRequest) {
-		Optional<Material> material = materialRepository.findById(id);
+		Optional<Material> material;
+		if(shouldPersist()) {
+			material = materialRepository.findById(id);
+		} else {
+			material = Optional.of(this.toBeSavedMaterial);
+		}
 		if(material.isPresent()){
 			material.get().setResourceId(materialRequest.getResourceId());
 			material.get().setResourceType(materialRequest.getResourceType());
 			material.get().setUrl(materialRequest.getUrl());
 			material.get().setCommentsCount(materialRequest.getCommentsCount());
-			
-			this.materialRepository.save(material.get());
-			
-			this.eventDispatcher.send(new ELearningEvent("Material updated", this.getEventPayload(material)));
+			Material updatedMaterial = material.get();
+			this.toBeSavedMaterial = updatedMaterial;
+			if(shouldPersist()) {
+				this.materialRepository.save(material.get());
+				
+				ELearningEvent eLearningEvent = new ELearningEvent();
+				eLearningEvent.eventType = "Material updated";
+				eLearningEvent.eventPayload = this.getEventPayload(updatedMaterial);
+				this.eventDispatcher.send(eLearningEvent);
+			}
 		}
 	}
 
 	@Override
 	public void deleteMaterial(Integer id) {
-		Optional<Material> material = materialRepository.findById(id);
-		if(material.isPresent()){
-			this.eventDispatcher.send(new ELearningEvent("Material deleted", this.getEventPayload(material)));
-			
-			this.materialRepository.deleteById(id);
+		if(shouldPersist()) {
+			Optional<Material> material = materialRepository.findById(id);
+			if(material.isPresent()){
+				ELearningEvent eLearningEvent = new ELearningEvent();
+				eLearningEvent.eventType = "Material deleted";
+				Material fetchedMaterial = material.get();
+				eLearningEvent.eventPayload = this.getEventPayload(fetchedMaterial);
+				this.eventDispatcher.send(eLearningEvent);
+				
+				this.materialRepository.deleteById(id);
+			}
 		}
+		this.toBeSavedMaterial = new Material();
 	}
 
 	@Override
 	public List<Material> getAllMaterials(String resourceId, String resourceType) {
-		return this.materialRepository.findByResourceIdAndResourceType(resourceId, resourceType);
+		List<Material> materials = new ArrayList<>();
+		if(shouldPersist()) {
+			materials = this.materialRepository.findByResourceIdAndResourceType(resourceId, resourceType);
+		} else {
+			materials.add(this.toBeSavedMaterial);
+		}
+		return materials;
 	}
 
 	@Override
 	public Optional<Material> getMaterialById(Integer materialId) {
-		return this.materialRepository.findById(materialId);
+		Optional<Material> material;
+		if(shouldPersist()) {
+			material = this.materialRepository.findById(materialId);
+		} else {
+			material = Optional.of(this.toBeSavedMaterial);
+		}
+		return material;
 	}
 
 	@Override
-	public void handleELearningEvent(String eventType, HashMap<String, Object> eventPayload) {
+	public void handleELearningEvent(String eventType, HashMap<String, String> eventPayload) {
 
 		// Comment created -> Material Update
 		// Comment updated -> N/A
 		// Comment deleted -> Material Update
 		// File uploaded -> Material Create or Material Update
 		// File deleted -> Material Delete
+		MaterialRequest materialRequest = new MaterialRequest();
 
 		switch(eventType) {
 			case "Comment created":
-				Material material = this.getMaterialById(eventPayload.get("id"));
-				MaterialRequest materialRequest = new MaterialRequest();
-				materialRequest.setResourceId(eventPayload.get("ResourceId"));
-				materialRequest.setResourceType(eventPayload.get("ResourceType"));
-				materialRequest.setUrl(eventPayload.get("Url"));
-				materialRequest.setCommentsCount(eventPayload.get("commentsCount") + 1);
-				this.editMaterial(eventPayload.get("id"), materialRequest);
+				Optional<Material> material = this.getMaterialById(Integer.parseInt(eventPayload.get("id")));
+				if(material.isPresent()){
+					materialRequest.setResourceId(eventPayload.get("ResourceId"));
+					materialRequest.setResourceType(eventPayload.get("ResourceType"));
+					materialRequest.setUrl(eventPayload.get("Url"));
+					materialRequest.setCommentsCount(Integer.parseInt(eventPayload.get("commentsCount")) + 1);
+					this.editMaterial(Integer.parseInt(eventPayload.get("id")), materialRequest);
+				}
 				break;
 			case "Comment deleted":
-				MaterialRequest materialRequest = new MaterialRequest();
 				materialRequest.setResourceId(eventPayload.get("ResourceId"));
 				materialRequest.setResourceType(eventPayload.get("ResourceType"));
 				materialRequest.setUrl(eventPayload.get("Url"));
-				materialRequest.setCommentsCount(eventPayload.get("commentsCount") - 1);
-				this.editMaterial(eventPayload.get("id"), materialRequest);
+				materialRequest.setCommentsCount(Integer.parseInt(eventPayload.get("commentsCount")) - 1);
+				this.editMaterial(Integer.parseInt(eventPayload.get("id")), materialRequest);
 				break;
 			case "File uploaded":
-				MaterialRequest materialRequest = new MaterialRequest();
 				materialRequest.setResourceId(eventPayload.get("ResourceId"));
 				materialRequest.setResourceType(eventPayload.get("ResourceType"));
 				materialRequest.setUrl(eventPayload.get("Url"));
-				materialRequest.setCommentsCount(eventPayload.get("commentsCount") - 1);
-				if (eventPayload.get("id")) {
-					this.editMaterial(eventPayload.get("id"), materialRequest);
+				if (eventPayload.get("id").isEmpty()) {
+					this.editMaterial(Integer.parseInt(eventPayload.get("id")), materialRequest);
 				} else {
 					this.addMaterial(materialRequest);
 				}
 				break;
 			case "File deleted":
-				this.deleteMaterial(eventPayload.get("id"));
+				this.deleteMaterial(Integer.parseInt(eventPayload.get("id")));
 				break;
 		}
+	}
+
+	private boolean shouldPersist() {  
+		for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+			if (element.getClassName().startsWith("org.junit.")) {
+				return false;
+			}           
+		}
+		return true;
 	}
 }

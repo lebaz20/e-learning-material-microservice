@@ -20,27 +20,27 @@ public class MaterialController {
 	}
 
 	@PostMapping("/materials")
-	public Material addMaterial(@Valid @RequestBody MaterialRequest materialRequest){
-		return materialService.addMaterial(materialRequest);
+	public void addMaterial(@Valid @RequestBody MaterialRequest materialRequest){
+		this.materialService.addMaterial(materialRequest);
 	}
 
 	@GetMapping("/materials")
-    public List<Material> getAllMaterials(@QueryParam("resourceId") String resourceId, @QueryParam("resourceType") String resourceType){
-	    return materialService.getAllMaterials(resourceId, resourceType);
+    public List<Material> getAllMaterials(@RequestParam String resourceId, @RequestParam String resourceType){
+	    return this.materialService.getAllMaterials(resourceId, resourceType);
     }
 
     @GetMapping("/materials/{id}")
 	public Material getMaterial(@PathVariable Integer id){
-		return materialService.getMaterialById(id).isPresent() ? materialService.getMaterialById(id).get() : null;
+		return this.materialService.getMaterialById(id).isPresent() ? materialService.getMaterialById(id).get() : null;
 	}
 
 	@PutMapping("/materials/{id}")
-	public Material editMaterial(@PathVariable Integer id, @Valid @RequestBody MaterialRequest materialRequest){
-		return materialService.editMaterial(id, materialRequest);
+	public void editMaterial(@PathVariable Integer id, @Valid @RequestBody MaterialRequest materialRequest){
+		this.materialService.editMaterial(id, materialRequest);
 	}
 
 	@DeleteMapping("/materials/{id}")
 	public void deleteMaterial(@PathVariable Integer id){
-		materialService.deleteMaterial(id);
+		this.materialService.deleteMaterial(id);
 	}
 }

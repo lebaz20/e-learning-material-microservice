@@ -1,0 +1,56 @@
+version: "3"
+services:
+  service-registry:
+    build: 
+      context: service-registry
+      dockerfile: ./DockerFile
+    ports:
+      - "8761:8761"
+    networks:
+      - service-registry-net
+  
+  api-gateway:
+    build: 
+      context: api-gateway
+      dockerfile: ./DockerFile
+    ports:
+      - "8000:8000"
+    networks:
+      - api-gateway-net
+      - service-registry-net
+    depends_on:
+      - service-registry
+
+  material-service:
+    build: 
+      context: material-service
+      dockerfile: ./DockerFile
+    ports:
+      - "8081:8081"
+    networks:
+      - material-service-net
+      - api-gateway-net
+      - service-registry-net
+    depends_on:
+      - service-registry
+      - api-gateway
+      - rabbitmq
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - rabbitmq_go_net
+
+networks:
+  service-registry-net:
+  api-gateway-net:
+  material-service-net:
+  rabbitmq_go_net:
+    driver: bridge

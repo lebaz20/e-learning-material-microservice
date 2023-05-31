@@ -4,12 +4,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import java.util.HashMap;
 
 @RequiredArgsConstructor
 @Getter
 @ToString
 @EqualsAndHashCode
 public class ELearningEvent {
-    private String eventType;
-    private HashMap<String, Object> eventPayload;
+    public String eventType;
+    public HashMap<String, String> eventPayload;
 }
