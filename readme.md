@@ -52,7 +52,7 @@ lombok plugin.
 ## Package service-registry application
 service-registry is the application where all microservice instances will register with a service id. When a service wants 
 to call another service, it will ask service-registry by service id to what instances are currently running for that service id. 
-service-registry check the instances and pass the request to any active the instance dynamically. This is called service 
+service-registry check the instances and pass the request to any active instance dynamically. This is called service 
 discovery. The advantage is no need to hard coded instance ip address, service registry always updates itself, if one instance 
 goes down, It removes that instance from the registry. 
 - **Eureka** is used to achieve this functionality

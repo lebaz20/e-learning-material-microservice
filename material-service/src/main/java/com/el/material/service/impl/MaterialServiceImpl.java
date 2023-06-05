@@ -33,7 +33,7 @@ public class MaterialServiceImpl implements MaterialService {
 	}
 
 	@Autowired
-	public void InventoryServiceImpl(MaterialRepository materialRepository,
+	public void MaterialServiceImpl(MaterialRepository materialRepository,
 							EventDispatcher eventDispatcher) {
 		this.materialRepository = materialRepository;
 		this.eventDispatcher = eventDispatcher;
@@ -156,9 +156,9 @@ public class MaterialServiceImpl implements MaterialService {
 				materialRequest.setResourceType(eventPayload.get("ResourceType"));
 				materialRequest.setUrl(eventPayload.get("Url"));
 				if (eventPayload.get("id").isEmpty()) {
-					this.editMaterial(Integer.parseInt(eventPayload.get("id")), materialRequest);
-				} else {
 					this.addMaterial(materialRequest);
+				} else {
+					this.editMaterial(Integer.parseInt(eventPayload.get("id")), materialRequest);
 				}
 				break;
 			case "File deleted":
