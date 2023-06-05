@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import java.util.HashMap;
+import java.io.Serializable;
 
 @RequiredArgsConstructor
 @Getter
 @ToString
 @EqualsAndHashCode
-public class ELearningEvent {
+public class ELearningEvent implements Serializable {
     public String eventType;
     public HashMap<String, String> eventPayload;
 }

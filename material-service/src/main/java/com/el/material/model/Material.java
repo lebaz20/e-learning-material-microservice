@@ -32,6 +32,6 @@ public class Material {
     @Column(name = "url")
     private String url;
 
-    @Column(name = "comments_count", columnDefinition="INT DEFAULT 0")
+    @Column(name = "comments_count", columnDefinition="integer default 0")
     private Integer commentsCount;
 }

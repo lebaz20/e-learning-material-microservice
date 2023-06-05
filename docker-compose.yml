@@ -1,36 +1,38 @@
 version: "3"
 services:
   service-registry:
-    build: 
+    build:
       context: service-registry
       dockerfile: ./DockerFile
+      network: host
     ports:
       - "8761:8761"
-    networks:
-      - service-registry-net
   
   api-gateway:
-    build: 
+    build:
       context: api-gateway
       dockerfile: ./DockerFile
+      network: host
+    environment:
+      # Important for clients to register with eureka
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
     ports:
       - "8000:8000"
-    networks:
-      - api-gateway-net
-      - service-registry-net
     depends_on:
       - service-registry
 
   material-service:
-    build: 
+    build:
       context: material-service
       dockerfile: ./DockerFile
+      network: host
+    environment:
+      # Important for clients to register with eureka
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+      # Important for reaching rabbitmq queue
+      - SPRING_RABBITMQ_HOST=rabbitmq
     ports:
       - "8081:8081"
-    networks:
-      - material-service-net
-      - api-gateway-net
-      - service-registry-net
     depends_on:
       - service-registry
       - api-gateway
@@ -38,19 +40,12 @@ services:
   
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    build:
+      network: host
     container_name: 'rabbitmq'
     ports:
-        - 5672:5672
-        - 15672:15672
+      - 5672:5672
+      - 15672:15672
     volumes:
-        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-    networks:
-        - rabbitmq_go_net
-
-networks:
-  service-registry-net:
-  api-gateway-net:
-  material-service-net:
-  rabbitmq_go_net:
-    driver: bridge
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq

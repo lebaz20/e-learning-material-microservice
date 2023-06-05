@@ -10,7 +10,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins="http://localhost:3000", allowedHeaders="*")
+@CrossOrigin(origins="*", allowedHeaders="*")
 public class MaterialController {
 	private MaterialService materialService;
 
@@ -21,6 +21,7 @@ public class MaterialController {
 
 	@PostMapping("/materials")
 	public void addMaterial(@Valid @RequestBody MaterialRequest materialRequest){
+		materialRequest.setCommentsCount(0);
 		this.materialService.addMaterial(materialRequest);
 	}
 
@@ -36,6 +37,7 @@ public class MaterialController {
 
 	@PutMapping("/materials/{id}")
 	public void editMaterial(@PathVariable Integer id, @Valid @RequestBody MaterialRequest materialRequest){
+		materialRequest.setCommentsCount(0);
 		this.materialService.editMaterial(id, materialRequest);
 	}
 

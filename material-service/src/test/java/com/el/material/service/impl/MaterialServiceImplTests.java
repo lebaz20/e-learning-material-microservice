@@ -1,4 +1,4 @@
-package com.el.material;
+package com.el.material.service.impl;
 
 import com.el.material.model.Material;
 import com.el.material.model.request.MaterialRequest;
