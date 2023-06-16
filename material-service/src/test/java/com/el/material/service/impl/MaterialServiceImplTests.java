@@ -4,17 +4,32 @@ import com.el.material.model.Material;
 import com.el.material.model.request.MaterialRequest;
 import com.el.material.repository.MaterialRepository;
 import com.el.material.event.EventDispatcher;
-import com.el.material.service.impl.MaterialServiceImpl;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.junit.Assert;
-import org.springframework.boot.test.context.SpringBootTest;
-import com.el.material.model.request.MaterialRequest;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class MaterialServiceImplTests {
+
+    @Mock
+    private MaterialRepository materialRepository;
+
+    @Mock
+    private EventDispatcher eventDispatcher;
+
+    @InjectMocks
+    private MaterialServiceImpl materialServiceImpl;
 
     @Test
     public void shouldAddMaterial() {
@@ -25,15 +40,14 @@ public class MaterialServiceImplTests {
         material.setUrl("www.example.com");
 
         // when
-        MaterialServiceImpl materialServiceImpl = new MaterialServiceImpl();
-        materialServiceImpl.addMaterial(material);
+        this.materialServiceImpl.addMaterial(material);
 
         // then
         Material expectedMaterial = new Material();
         expectedMaterial.setResourceId("1");
         expectedMaterial.setResourceType("class");
         expectedMaterial.setUrl("www.example.com");
-        Assert.assertEquals(materialServiceImpl.toBeSavedMaterial, expectedMaterial);
+        Assert.assertEquals(this.materialServiceImpl.toBeSavedMaterial, expectedMaterial);
     }
 
     @Test
@@ -46,29 +60,34 @@ public class MaterialServiceImplTests {
         Integer id = 1;
     
         // when
-        MaterialServiceImpl materialServiceImpl = new MaterialServiceImpl();
-        materialServiceImpl.editMaterial(id, material);
+        this.materialServiceImpl.editMaterial(id, material);
 
         // then
         Material expectedMaterial = new Material();
         expectedMaterial.setResourceId("1");
         expectedMaterial.setResourceType("class");
         expectedMaterial.setUrl("www.example.com");
-        Assert.assertEquals(materialServiceImpl.toBeSavedMaterial, expectedMaterial);
+        Assert.assertEquals(this.materialServiceImpl.toBeSavedMaterial, expectedMaterial);
     }
 
     @Test
     public void shouldDeleteMaterial() {
         // given
         Integer id = 1;
+        Material expectedMaterial = new Material();
+        expectedMaterial.setId(id);
+        expectedMaterial.setResourceId("1");
+        expectedMaterial.setResourceType("class");
+        expectedMaterial.setUrl("www.example.com");
+        expectedMaterial.setCommentsCount(1);
     
         // when
-        MaterialServiceImpl materialServiceImpl = new MaterialServiceImpl();
-        materialServiceImpl.deleteMaterial(id);
+        when(materialRepository.findById(id)).thenReturn(Optional.of(expectedMaterial));
+        this.materialServiceImpl.deleteMaterial(id);
 
         // then
-        Material expectedMaterial = new Material();
-        Assert.assertEquals(materialServiceImpl.toBeSavedMaterial, expectedMaterial);
+        verify(materialRepository).deleteById(eq(id));
+        // no exception is thrown
     }
 
     @Test
@@ -82,10 +101,9 @@ public class MaterialServiceImplTests {
         material.setUrl("www.example.com");
         
         // when
-        MaterialServiceImpl materialServiceImpl = new MaterialServiceImpl();
-        materialServiceImpl.toBeSavedMaterial = material;
+        this.materialServiceImpl.toBeSavedMaterial = material;
         List<Material> materials = new ArrayList<>();
-        materials = materialServiceImpl.getAllMaterials(resourceId, resourceType);
+        materials = this.materialServiceImpl.getAllMaterials(resourceId, resourceType);
 
         // then
         List<Material> expectedMaterials = new ArrayList<>();
@@ -105,10 +123,9 @@ public class MaterialServiceImplTests {
         Integer id = 1;
         
         // when
-        MaterialServiceImpl materialServiceImpl = new MaterialServiceImpl();
-        materialServiceImpl.toBeSavedMaterial = material;
+        this.materialServiceImpl.toBeSavedMaterial = material;
         Optional<Material> returnedMaterial;
-        returnedMaterial = materialServiceImpl.getMaterialById(id);
+        returnedMaterial = this.materialServiceImpl.getMaterialById(id);
 
         // then
         Material expectedMaterial = new Material();

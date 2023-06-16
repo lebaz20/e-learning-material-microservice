@@ -33,7 +33,7 @@ public class MaterialServiceImpl implements MaterialService {
 	}
 
 	@Autowired
-	public void MaterialServiceImpl(MaterialRepository materialRepository,
+	public MaterialServiceImpl(MaterialRepository materialRepository,
 							EventDispatcher eventDispatcher) {
 		this.materialRepository = materialRepository;
 		this.eventDispatcher = eventDispatcher;
@@ -86,19 +86,16 @@ public class MaterialServiceImpl implements MaterialService {
 
 	@Override
 	public void deleteMaterial(Integer id) {
-		if(shouldPersist()) {
-			Optional<Material> material = materialRepository.findById(id);
-			if(material.isPresent()){
-				ELearningEvent eLearningEvent = new ELearningEvent();
-				eLearningEvent.eventType = "Material deleted";
-				Material fetchedMaterial = material.get();
-				eLearningEvent.eventPayload = this.getEventPayload(fetchedMaterial);
-				this.eventDispatcher.send(eLearningEvent);
-				
-				this.materialRepository.deleteById(id);
-			}
+		Optional<Material> material = materialRepository.findById(id);
+		if(material.isPresent()){
+			ELearningEvent eLearningEvent = new ELearningEvent();
+			eLearningEvent.eventType = "Material deleted";
+			Material fetchedMaterial = material.get();
+			eLearningEvent.eventPayload = this.getEventPayload(fetchedMaterial);
+			this.eventDispatcher.send(eLearningEvent);
+
+			this.materialRepository.deleteById(id);
 		}
-		this.toBeSavedMaterial = new Material();
 	}
 
 	@Override
