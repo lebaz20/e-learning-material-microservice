@@ -5,7 +5,10 @@ import com.el.material.model.request.MaterialRequest;
 import com.el.material.repository.MaterialRepository;
 import com.el.material.service.MaterialService;
 import com.el.material.event.EventDispatcher;
+import com.el.material.event.EventHandlerFactory;
 import com.el.material.event.ELearningEvent;
+import com.el.material.event.ELearningEventType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -128,40 +131,9 @@ public class MaterialServiceImpl implements MaterialService {
 		// Comment deleted -> Material Update
 		// File uploaded -> Material Create or Material Update
 		// File deleted -> Material Delete
-		MaterialRequest materialRequest = new MaterialRequest();
 
-		switch(eventType) {
-			case "Comment created":
-				Optional<Material> material = this.getMaterialById(Integer.parseInt(eventPayload.get("id")));
-				if(material.isPresent()){
-					materialRequest.setResourceId(eventPayload.get("ResourceId"));
-					materialRequest.setResourceType(eventPayload.get("ResourceType"));
-					materialRequest.setUrl(eventPayload.get("Url"));
-					materialRequest.setCommentsCount(Integer.parseInt(eventPayload.get("commentsCount")) + 1);
-					this.editMaterial(Integer.parseInt(eventPayload.get("id")), materialRequest);
-				}
-				break;
-			case "Comment deleted":
-				materialRequest.setResourceId(eventPayload.get("ResourceId"));
-				materialRequest.setResourceType(eventPayload.get("ResourceType"));
-				materialRequest.setUrl(eventPayload.get("Url"));
-				materialRequest.setCommentsCount(Integer.parseInt(eventPayload.get("commentsCount")) - 1);
-				this.editMaterial(Integer.parseInt(eventPayload.get("id")), materialRequest);
-				break;
-			case "File uploaded":
-				materialRequest.setResourceId(eventPayload.get("ResourceId"));
-				materialRequest.setResourceType(eventPayload.get("ResourceType"));
-				materialRequest.setUrl(eventPayload.get("Url"));
-				if (eventPayload.get("id").isEmpty()) {
-					this.addMaterial(materialRequest);
-				} else {
-					this.editMaterial(Integer.parseInt(eventPayload.get("id")), materialRequest);
-				}
-				break;
-			case "File deleted":
-				this.deleteMaterial(Integer.parseInt(eventPayload.get("id")));
-				break;
-		}
+		String eventTypeProcessed = eventType.toUpperCase().replaceAll("\\s", "_");
+		EventHandlerFactory.getEventHandler(ELearningEventType.valueOf(eventTypeProcessed)).process(eventPayload);
 	}
 
 	private boolean shouldPersist() {  
