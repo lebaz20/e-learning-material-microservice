@@ -9,6 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 @Builder
@@ -16,6 +18,9 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "material")
+@Table(indexes = {
+    @Index(name = "resource_index", columnList = "resource_type, resource_id"),
+})
 public class Material {
     @Id
     @GeneratedValue
